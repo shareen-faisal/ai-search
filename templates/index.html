@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Search Assignment</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
+        #network { width: 800px; height: 500px; background: white; margin: 20px auto; border: 1px solid #ccc; }
+        .controls { padding: 20px; background: white; display: inline-block; border-radius: 8px; }
+        button { padding: 10px 15px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Romania Map Search</h1>
+    
+    <div class="controls">
+        <label>Start: <input id="start" value="Arad"></label>
+        <label>Goal: <input id="goal" value="Bucharest"></label>
+        <br><br>
+        <button onclick="runAlgo('BFS')">Run BFS</button>
+        <button onclick="runAlgo('DFS')">Run DFS</button>
+        <button onclick="runAlgo('UCS')">Run UCS</button>
+    </div>
+
+    <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+    <div id="network"></div>
+
+    <script>
+        // 1. VISUALIZATION SETUP (Vis.js)
+        const nodes = new vis.DataSet([
+            {id:'Arad', label:'Arad'}, {id:'Zerind', label:'Zerind'}, {id:'Oradea', label:'Oradea'},
+            {id:'Sibiu', label:'Sibiu'}, {id:'Timisoara', label:'Timisoara'}, {id:'Lugoj', label:'Lugoj'},
+            {id:'Mehadia', label:'Mehadia'}, {id:'Drobeta', label:'Drobeta'}, {id:'Craiova', label:'Craiova'},
+            {id:'Rimnicu Vilcea', label:'Rimnicu'}, {id:'Fagaras', label:'Fagaras'}, {id:'Pitesti', label:'Pitesti'},
+            {id:'Bucharest', label:'Bucharest'}, {id:'Giurgiu', label:'Giurgiu'}, {id:'Urziceni', label:'Urziceni'},
+            {id:'Hirsova', label:'Hirsova'}, {id:'Eforie', label:'Eforie'}, {id:'Vaslui', label:'Vaslui'},
+            {id:'Iasi', label:'Iasi'}, {id:'Neamt', label:'Neamt'}
+        ]);
+        
+        // Simplified edges for display (Backend has real weights)
+        const edges = new vis.DataSet([
+            {from:'Arad', to:'Zerind', label:'75'}, {from:'Arad', to:'Sibiu', label:'140'}, {from:'Arad', to:'Timisoara', label:'118'},
+            {from:'Zerind', to:'Oradea', label:'71'}, {from:'Oradea', to:'Sibiu', label:'151'}, {from:'Sibiu', to:'Fagaras', label:'99'},
+            {from:'Sibiu', to:'Rimnicu Vilcea', label:'80'}, {from:'Timisoara', to:'Lugoj', label:'111'}, {from:'Lugoj', to:'Mehadia', label:'70'},
+            {from:'Mehadia', to:'Drobeta', label:'75'}, {from:'Drobeta', to:'Craiova', label:'120'}, {from:'Craiova', to:'Rimnicu Vilcea', label:'146'},
+            {from:'Craiova', to:'Pitesti', label:'138'}, {from:'Rimnicu Vilcea', to:'Pitesti', label:'97'}, {from:'Fagaras', to:'Bucharest', label:'211'},
+            {from:'Pitesti', to:'Bucharest', label:'101'}, {from:'Bucharest', to:'Giurgiu', label:'90'}, {from:'Bucharest', to:'Urziceni', label:'85'},
+            {from:'Urziceni', to:'Hirsova', label:'98'}, {from:'Urziceni', to:'Vaslui', label:'142'}, {from:'Hirsova', to:'Eforie', label:'86'},
+            {from:'Vaslui', to:'Iasi', label:'92'}, {from:'Iasi', to:'Neamt', label:'87'}
+        ]);
+
+        const container = document.getElementById('network');
+        const network = new vis.Network(container, {nodes, edges}, {physics: true});
+
+        // 2. CONNECT TO PYTHON
+        async function runAlgo(algo) {
+            const start = document.getElementById('start').value;
+            const goal = document.getElementById('goal').value;
+
+            const response = await fetch('/solve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({start, goal, algo})
+            });
+
+            const data = await response.json();
+            
+            // Display Results
+            document.getElementById('result').innerText = 
+                `${algo} Result: Path [ ${data.path.join(' -> ')} ] | Cost: ${data.cost} | Steps: ${data.steps}`;
+            
+            // Highlight Path Red
+            nodes.update(data.path.map(id => ({id, color: {background:'red'}, font:{color:'white'}})));
+        }
+    </script>
+</body>
+</html>
