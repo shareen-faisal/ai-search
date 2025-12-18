@@ -1,211 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AI Search Assignment</title>
+    <title>Romania Route Planner</title>
+    <link rel="stylesheet" href="/static/style.css" />
     <script
       type="text/javascript"
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
-
-    <style>
-      /* --- 1. LAYOUT & THEME --- */
-      body {
-        font-family: "Segoe UI", sans-serif;
-        margin: 0;
-        background-color: #f0f2f5;
-        color: #333;
-        display: flex;
-        flex-direction: column; /* Changed to Column to stack Header + Content */
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      /* --- 2. TOP HEADER --- */
-      .top-header {
-        /* background-color: #2c3e50; */
-        color: #007bff;
-        padding: 15px 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 20;
-        display: flex;
-        align-items: center;
-        text-align: center;
-      }
-      .top-header h1 {
-        font-size: 1.4rem;
-        font-weight: 600;
-      }
-
-      /* --- 3. APP CONTAINER (Sidebars + Graph) --- */
-      .app-container {
-        display: flex;
-        flex-grow: 1;
-        overflow: hidden; /* Contains the scrollbars inside sections */
-      }
-
-      /* --- 4. LEFT SIDEBAR (CONTROLS) --- */
-      .left-sidebar {
-        width: 300px;
-        min-width: 300px;
-        background-color: white;
-        padding: 20px;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        overflow-y: auto;
-        border-right: 1px solid #e0e0e0;
-        z-index: 10;
-      }
-
-      .left-sidebar h2 {
-        margin-top: 0;
-        font-size: 1.1rem;
-        color: #444;
-        border-bottom: 2px solid #f0f2f5;
-        padding-bottom: 10px;
-      }
-      .left-sidebar label {
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-        display: block;
-        font-weight: 600;
-        color: #555;
-      }
-
-      .left-sidebar input,
-      .left-sidebar select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-sizing: border-box;
-        background-color: #fafafa;
-        color: #333;
-      }
-
-      /* Dynamic Row Styling */
-      .connection-row {
-        display: flex;
-        gap: 5px;
-        margin-bottom: 5px;
-      }
-      .connection-row select {
-        flex: 2;
-        margin-bottom: 0;
-      } /* Neighbor is now SELECT */
-      .connection-row input {
-        flex: 1;
-        margin-bottom: 0;
-      } /* Cost is INPUT */
-
-      button {
-        width: 100%;
-        padding: 12px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background 0.2s;
-        margin-top: 5px;
-      }
-      .btn-run {
-        background-color: #007bff;
-        color: white;
-        margin-bottom: 10px;
-      }
-      .btn-run:hover {
-        background-color: #0056b3;
-      }
-      .btn-add {
-        background-color: #007bff;
-        color: white;
-        margin-top: 15px;
-      }
-      .btn-add:hover {
-        background-color: #0056b3;
-      }
-      .btn-small {
-        background-color: #e2e6ea;
-        color: #555;
-        font-size: 0.85rem;
-        padding: 8px;
-        margin-top: 0;
-      }
-      .btn-small:hover {
-        background-color: #dbe0e5;
-        color: #333;
-      }
-
-      /* --- 5. MAIN CONTENT (GRAPH) --- */
-      .main-content {
-        flex-grow: 1;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        background-color: #f0f2f5;
-      }
-
-      #network {
-        width: 100%;
-        height: 100%;
-        min-height: 500px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e0e0e0;
-      }
-
-      /* --- 6. RIGHT SIDEBAR (RESULTS) --- */
-      .right-sidebar {
-        width: 250px;
-        min-width: 250px;
-        background-color: white;
-        padding: 20px;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
-        border-left: 1px solid #e0e0e0;
-        overflow-y: auto;
-        z-index: 10;
-      }
-
-      .right-sidebar h2 {
-        margin-top: 0;
-        font-size: 1.1rem;
-        color: #444;
-        border-bottom: 2px solid #f0f2f5;
-        padding-bottom: 10px;
-      }
-
-      .result-box {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        padding: 15px;
-        margin-bottom: 15px;
-      }
-      .result-metric {
-        margin-bottom: 10px;
-        font-size: 0.95rem;
-      }
-      .result-metric span {
-        font-weight: bold;
-        color: #007bff;
-      }
-
-      .path-list {
-        padding-left: 20px;
-        margin: 5px 0;
-        color: #555;
-      }
-      .path-list li {
-        margin-bottom: 5px;
-      }
-    </style>
   </head>
   <body>
     <div class="top-header">
-      <h1>AI Search Assignment</h1>
+      <h1>Romania Route Planner</h1>
     </div>
 
     <div class="app-container">
@@ -238,10 +43,10 @@
           <div id="connectionsContainer"></div>
 
           <button class="btn-small" onclick="addConnectionRow()">
-            + Add Another Link
+            + Add Another Road
           </button>
           <button class="btn-add" onclick="saveNode()">
-            Save Node & Links
+            Save City & Roads
           </button>
         </div>
       </div>
@@ -278,14 +83,12 @@
     </div>
 
     <script type="text/javascript">
-      // --- 0. SAFETY CHECK ---
       if (typeof vis === "undefined") {
         alert(
           "Error: Vis.js library could not load. Please check your internet connection."
         );
       }
 
-      // --- 1. INITIAL DATA ---
       let nodesArray = [
         { id: "Arad", label: "Arad" },
         { id: "Zerind", label: "Zerind" },
@@ -335,7 +138,6 @@
         { from: "Iasi", to: "Neamt", label: "87" },
       ];
 
-      // --- 2. DRAW GRAPH ---
       const nodes = new vis.DataSet(nodesArray);
       const edges = new vis.DataSet(edgesArray);
       const container = document.getElementById("network");
@@ -344,11 +146,20 @@
       const options = {
         physics: { enabled: true, stabilization: { iterations: 100 } },
         edges: { font: { align: "top" } },
+        nodes: {
+          color: {
+            background: "#e1bee7",
+            border: "#8e24aa",
+            highlight: {
+              background: "#d1c4e9",
+              border: "#7b1fa2",
+            },
+          },
+        },
       };
 
       const network = new vis.Network(container, data, options);
 
-      // --- 3. HELPER: Generate Options for Dropdowns ---
       function getCityOptionsHTML() {
         const allNodes = nodes.get().sort((a, b) => a.id.localeCompare(b.id));
         let html = "";
@@ -358,9 +169,7 @@
         return html;
       }
 
-      // --- 4. POPULATE DROPDOWNS (Main Search + Neighbors) ---
       function updateAllDropdowns() {
-        // 1. Update Search Start/Goal
         const startSelect = document.getElementById("start");
         const goalSelect = document.getElementById("goal");
         const currentStart = startSelect.value || "Arad";
@@ -370,21 +179,15 @@
         startSelect.innerHTML = optionsHTML;
         goalSelect.innerHTML = optionsHTML;
 
-        // Restore selection if possible
         startSelect.value = currentStart;
         goalSelect.value = currentGoal;
-
-        // 2. Update Any Existing Connection Rows (Optional, but good UX)
-        // (If you want to live-update current rows, you'd loop through them here)
       }
 
-      // --- 5. LOGIC: ADD CONNECTION ROW ---
       function addConnectionRow() {
         const container = document.getElementById("connectionsContainer");
         const div = document.createElement("div");
         div.className = "connection-row";
 
-        // USE DROPDOWN FOR NEIGHBOR
         div.innerHTML = `
                 <select class="conn-neighbor">
                     ${getCityOptionsHTML()}
@@ -394,11 +197,9 @@
         container.appendChild(div);
       }
 
-      // Initialize on Load
       updateAllDropdowns();
-      addConnectionRow(); // Add the first row by default
+      addConnectionRow();
 
-      // --- 6. LOGIC: SAVE NODE ---
       async function saveNode() {
         const newNode = document.getElementById("newNode").value.trim();
         if (!newNode) {
@@ -411,7 +212,7 @@
         let connectionsList = [];
 
         for (let i = 0; i < neighbors.length; i++) {
-          let nVal = neighbors[i].value; // Value from Dropdown
+          let nVal = neighbors[i].value;
           let cVal = costs[i].value.trim();
           if (nVal && cVal)
             connectionsList.push({ neighbor: nVal, cost: cVal });
@@ -442,10 +243,10 @@
           });
 
           document.getElementById("newNode").value = "";
-          document.getElementById("connectionsContainer").innerHTML = ""; // Clear rows
+          document.getElementById("connectionsContainer").innerHTML = "";
 
-          updateAllDropdowns(); // Refresh dropdowns with new city
-          addConnectionRow(); // Add a fresh row
+          updateAllDropdowns();
+          addConnectionRow();
 
           alert("Node Added!");
         } else {
@@ -453,11 +254,14 @@
         }
       }
 
-      // --- 7. LOGIC: RUN ALGORITHM ---
       async function runAlgo() {
         const start = document.getElementById("start").value;
         const goal = document.getElementById("goal").value;
         const algo = document.getElementById("algo").value;
+
+        const runButton = document.querySelector(".btn-run");
+        runButton.disabled = true;
+        runButton.innerText = "Searching...";
 
         const response = await fetch("/solve", {
           method: "POST",
@@ -470,7 +274,6 @@
         if (resData.path.length > 0) {
           document.getElementById("resultContainer").style.display = "block";
           document.getElementById("resultPlaceholder").style.display = "none";
-
           document.getElementById("resAlgo").innerText = algo;
           document.getElementById("resCost").innerText = resData.cost;
           document.getElementById("resSteps").innerText = resData.steps;
@@ -484,18 +287,28 @@
           });
 
           nodes.forEach((node) =>
-            nodes.update({ id: node.id, color: null, font: { color: "black" } })
+            nodes.update({
+              id: node.id,
+              color: { background: "#e1bee7", border: "#8e24aa" },
+              font: { color: "black" },
+            })
           );
-          resData.path.forEach((id) => {
+
+          for (const id of resData.path) {
             nodes.update({
               id: id,
-              color: { background: "#007bff", border: "#0056b3" },
+              color: { background: "#7b1fa2", border: "#4a148c" },
               font: { color: "white" },
             });
-          });
+
+            await new Promise((r) => setTimeout(r, 1000));
+          }
         } else {
           alert("No path found!");
         }
+
+        runButton.disabled = false;
+        runButton.innerText = "Run Search Algorithm";
       }
     </script>
   </body>

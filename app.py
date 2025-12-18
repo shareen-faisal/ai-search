@@ -3,7 +3,6 @@ import heapq
 
 app = Flask(__name__)
 
-# Global graph variable
 graph = {
     'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
     'Zerind': [('Arad', 75), ('Oradea', 71)],
@@ -27,12 +26,11 @@ graph = {
     'Neamt': [('Iasi', 87)]
 }
 
-# --- Algorithms (BFS, DFS, UCS) ---
 def bfs(start, goal):
     queue = [[start]]
     visited = set()
     steps = 0
-    if start not in graph: return [], 0, 0 # Handle invalid start
+    if start not in graph: return [], 0, 0 
     while queue:
         path = queue.pop(0)
         node = path[-1]
@@ -90,7 +88,6 @@ def calculate_cost(path):
                 break
     return total
 
-# --- Routes ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -107,35 +104,30 @@ def solve():
     
     return jsonify({'path': path, 'cost': cost, 'steps': steps})
 
-# --- NEW: Route to Add Node ---
 @app.route('/add_node', methods=['POST'])
 def add_node():
     data = request.json
     node = data.get('node')
-    connections = data.get('connections') # Expecting a list: [{'neighbor': 'Arad', 'cost': 50}, ...]
+    connections = data.get('connections')
 
     if not node or not connections:
         return jsonify({'error': 'Missing data'}), 400
 
-    # 1. Ensure the main node exists in the dictionary
     if node not in graph:
         graph[node] = []
     
-    # 2. Loop through all provided connections
     for conn in connections:
         neighbor = conn.get('neighbor')
         try:
             cost = int(conn.get('cost'))
         except:
-            continue # Skip invalid costs
+            continue 
 
-        # Add connection: Node -> Neighbor
         if not any(n == neighbor for n, c in graph[node]):
             graph[node].append((neighbor, cost))
 
-        # Add connection: Neighbor -> Node (Undirected Graph)
         if neighbor not in graph:
-            graph[neighbor] = [] # Create neighbor if it doesn't exist
+            graph[neighbor] = []
         
         if not any(n == node for n, c in graph[neighbor]):
             graph[neighbor].append((node, cost))
