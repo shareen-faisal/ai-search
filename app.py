@@ -3,7 +3,7 @@ import heapq
 
 app = Flask(__name__)
 
-# 1. GRAPH DATA (Romania Map)
+# Global graph variable
 graph = {
     'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
     'Zerind': [('Arad', 75), ('Oradea', 71)],
@@ -27,11 +27,12 @@ graph = {
     'Neamt': [('Iasi', 87)]
 }
 
-# 2. ALGORITHMS
+# --- Algorithms (BFS, DFS, UCS) ---
 def bfs(start, goal):
     queue = [[start]]
     visited = set()
     steps = 0
+    if start not in graph: return [], 0, 0 # Handle invalid start
     while queue:
         path = queue.pop(0)
         node = path[-1]
@@ -49,6 +50,7 @@ def dfs(start, goal):
     stack = [[start]]
     visited = set()
     steps = 0
+    if start not in graph: return [], 0, 0
     while stack:
         path = stack.pop()
         node = path[-1]
@@ -66,6 +68,7 @@ def ucs(start, goal):
     pq = [(0, [start])]
     visited = set()
     steps = 0
+    if start not in graph: return [], 0, 0
     while pq:
         cost, path = heapq.heappop(pq)
         node = path[-1]
@@ -81,13 +84,13 @@ def ucs(start, goal):
 def calculate_cost(path):
     total = 0
     for i in range(len(path) - 1):
-        for neighbor, weight in graph[path[i]]:
+        for neighbor, weight in graph.get(path[i], []):
             if neighbor == path[i+1]:
                 total += weight
                 break
     return total
 
-# 3. ROUTES (Connecting to Frontend)
+# --- Routes ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -95,13 +98,49 @@ def home():
 @app.route('/solve', methods=['POST'])
 def solve():
     data = request.json
-    start, goal, algo = data['start'], data['goal'], data['algo']
+    start, goal, algo = data.get('start'), data.get('goal'), data.get('algo')
+    path, cost, steps = [], 0, 0
     
     if algo == 'BFS': path, cost, steps = bfs(start, goal)
     elif algo == 'DFS': path, cost, steps = dfs(start, goal)
     else: path, cost, steps = ucs(start, goal)
     
     return jsonify({'path': path, 'cost': cost, 'steps': steps})
+
+# --- NEW: Route to Add Node ---
+@app.route('/add_node', methods=['POST'])
+def add_node():
+    data = request.json
+    node = data.get('node')
+    connections = data.get('connections') # Expecting a list: [{'neighbor': 'Arad', 'cost': 50}, ...]
+
+    if not node or not connections:
+        return jsonify({'error': 'Missing data'}), 400
+
+    # 1. Ensure the main node exists in the dictionary
+    if node not in graph:
+        graph[node] = []
+    
+    # 2. Loop through all provided connections
+    for conn in connections:
+        neighbor = conn.get('neighbor')
+        try:
+            cost = int(conn.get('cost'))
+        except:
+            continue # Skip invalid costs
+
+        # Add connection: Node -> Neighbor
+        if not any(n == neighbor for n, c in graph[node]):
+            graph[node].append((neighbor, cost))
+
+        # Add connection: Neighbor -> Node (Undirected Graph)
+        if neighbor not in graph:
+            graph[neighbor] = [] # Create neighbor if it doesn't exist
+        
+        if not any(n == node for n, c in graph[neighbor]):
+            graph[neighbor].append((node, cost))
+
+    return jsonify({'status': 'success', 'graph': graph})
 
 if __name__ == '__main__':
     app.run(debug=True)
