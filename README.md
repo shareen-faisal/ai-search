@@ -38,3 +38,42 @@ A web-based interactive visualizer for Artificial Intelligence search algorithms
 ├── requirements.txt   
 ├── vercel.json        
 └── README.md          
+```
+💻 How to Run Locally
+Follow these steps to set up and run the project on your own computer.
+
+1. Prerequisites
+Make sure you have Python 3.x installed. You can check by running:
+
+```bash
+
+python --version
+```
+2. Download the Project
+Clone the repository or download the ZIP file and extract it.
+
+```bash
+
+git clone <your-repository-link>
+cd <your-project-folder>
+```
+3. Install Dependencies
+Open your terminal/command prompt in the project folder and install the required Python packages (Flask):
+
+```bash
+
+pip install -r requirements.txt
+```
+4. Run the Application
+Start the Flask server by running the app.py file:
+
+```bash
+python app.py
+```
+You should see output indicating the server is running (usually on http://127.0.0.1:5000).
+
+5. Open in Browser
+Open your web browser (Chrome, Edge, etc.) and navigate to:
+```bash
+[http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+```
