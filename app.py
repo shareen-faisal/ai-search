@@ -92,6 +92,10 @@ def calculate_cost(path):
 def home():
     return render_template('index.html')
 
+@app.route('/get_graph')
+def get_graph():
+    return jsonify(graph)
+
 @app.route('/solve', methods=['POST'])
 def solve():
     data = request.json
