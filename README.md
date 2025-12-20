@@ -54,8 +54,7 @@ Clone the repository or download the ZIP file and extract it.
 
 ```bash
 
-git clone <your-repository-link>
-cd <your-project-folder>
+git clone https://github.com/shareen-faisal/ai-search.git
 ```
 3. Install Dependencies
 Open your terminal/command prompt in the project folder and install the required Python packages (Flask):
