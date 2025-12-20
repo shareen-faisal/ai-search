@@ -82,285 +82,6 @@
       </div>
     </div>
 
-    <!-- <script type="text/javascript">
-      if (typeof vis === "undefined") {
-        alert(
-          "Error: Vis.js library could not load. Please check your internet connection."
-        );
-      }
-
-      // --- 8. LOGIC: SYNC GRAPH ON LOAD ---
-      async function fetchGraphOnLoad() {
-        try {
-          const response = await fetch('/get_graph');
-          const serverGraph = await response.json();
-
-          const newNodes = [];
-          const newEdges = [];
-          const addedEdges = new Set(); // To avoid duplicates
-
-          // 1. Process Nodes
-          Object.keys(serverGraph).forEach(city => {
-             // Avoid duplicates if reusing existing arrays, but here we rebuild
-             newNodes.push({ id: city, label: city });
-          });
-
-          // 2. Process Edges
-          Object.entries(serverGraph).forEach(([city, neighbors]) => {
-              neighbors.forEach(([neighbor, cost]) => {
-                  // Create a unique ID for edge (e.g., "Arad-Zerind") to prevent duplicates
-                  // We sort names so "Arad-Zerind" and "Zerind-Arad" are treated as the same edge
-                  const edgeId = [city, neighbor].sort().join('-');
-                  
-                  if (!addedEdges.has(edgeId)) {
-                      newEdges.push({ from: city, to: neighbor, label: String(cost) });
-                      addedEdges.add(edgeId);
-                  }
-              });
-          });
-
-          // 3. Clear and Update Vis.js Datasets
-          nodes.clear();
-          edges.clear();
-          nodes.add(newNodes);
-          edges.add(newEdges);
-
-          // 4. Refresh Dropdowns with the new data
-          updateAllDropdowns();
-          
-        } catch (error) {
-          console.error("Could not fetch graph from server:", error);
-        }
-      }
-
-      // --- INITIALIZE ---
-      // Call our new sync function instead of just loading static data
-      fetchGraphOnLoad();
-      addConnectionRow();
-
-      let nodesArray = [
-        { id: "Arad", label: "Arad" },
-        { id: "Zerind", label: "Zerind" },
-        { id: "Oradea", label: "Oradea" },
-        { id: "Sibiu", label: "Sibiu" },
-        { id: "Timisoara", label: "Timisoara" },
-        { id: "Lugoj", label: "Lugoj" },
-        { id: "Mehadia", label: "Mehadia" },
-        { id: "Drobeta", label: "Drobeta" },
-        { id: "Craiova", label: "Craiova" },
-        { id: "Rimnicu Vilcea", label: "Rimnicu" },
-        { id: "Fagaras", label: "Fagaras" },
-        { id: "Pitesti", label: "Pitesti" },
-        { id: "Bucharest", label: "Bucharest" },
-        { id: "Giurgiu", label: "Giurgiu" },
-        { id: "Urziceni", label: "Urziceni" },
-        { id: "Hirsova", label: "Hirsova" },
-        { id: "Eforie", label: "Eforie" },
-        { id: "Vaslui", label: "Vaslui" },
-        { id: "Iasi", label: "Iasi" },
-        { id: "Neamt", label: "Neamt" },
-      ];
-
-      let edgesArray = [
-        { from: "Arad", to: "Zerind", label: "75" },
-        { from: "Arad", to: "Sibiu", label: "140" },
-        { from: "Arad", to: "Timisoara", label: "118" },
-        { from: "Zerind", to: "Oradea", label: "71" },
-        { from: "Oradea", to: "Sibiu", label: "151" },
-        { from: "Sibiu", to: "Fagaras", label: "99" },
-        { from: "Sibiu", to: "Rimnicu Vilcea", label: "80" },
-        { from: "Timisoara", to: "Lugoj", label: "111" },
-        { from: "Lugoj", to: "Mehadia", label: "70" },
-        { from: "Mehadia", to: "Drobeta", label: "75" },
-        { from: "Drobeta", to: "Craiova", label: "120" },
-        { from: "Craiova", to: "Rimnicu Vilcea", label: "146" },
-        { from: "Craiova", to: "Pitesti", label: "138" },
-        { from: "Rimnicu Vilcea", to: "Pitesti", label: "97" },
-        { from: "Fagaras", to: "Bucharest", label: "211" },
-        { from: "Pitesti", to: "Bucharest", label: "101" },
-        { from: "Bucharest", to: "Giurgiu", label: "90" },
-        { from: "Bucharest", to: "Urziceni", label: "85" },
-        { from: "Urziceni", to: "Hirsova", label: "98" },
-        { from: "Urziceni", to: "Vaslui", label: "142" },
-        { from: "Hirsova", to: "Eforie", label: "86" },
-        { from: "Vaslui", to: "Iasi", label: "92" },
-        { from: "Iasi", to: "Neamt", label: "87" },
-      ];
-
-      const nodes = new vis.DataSet(nodesArray);
-      const edges = new vis.DataSet(edgesArray);
-      const container = document.getElementById("network");
-
-      const data = { nodes: nodes, edges: edges };
-      const options = {
-        physics: { enabled: true, stabilization: { iterations: 100 } },
-        edges: { font: { align: "top" } },
-        nodes: {
-          color: {
-            background: "#e1bee7",
-            border: "#8e24aa",
-            highlight: {
-              background: "#d1c4e9",
-              border: "#7b1fa2",
-            },
-          },
-        },
-      };
-
-      const network = new vis.Network(container, data, options);
-
-      function getCityOptionsHTML() {
-        const allNodes = nodes.get().sort((a, b) => a.id.localeCompare(b.id));
-        let html = "";
-        allNodes.forEach((node) => {
-          html += `<option value="${node.id}">${node.label}</option>`;
-        });
-        return html;
-      }
-
-      function updateAllDropdowns() {
-        const startSelect = document.getElementById("start");
-        const goalSelect = document.getElementById("goal");
-        const currentStart = startSelect.value || "Arad";
-        const currentGoal = goalSelect.value || "Bucharest";
-
-        const optionsHTML = getCityOptionsHTML();
-        startSelect.innerHTML = optionsHTML;
-        goalSelect.innerHTML = optionsHTML;
-
-        startSelect.value = currentStart;
-        goalSelect.value = currentGoal;
-      }
-
-      function addConnectionRow() {
-        const container = document.getElementById("connectionsContainer");
-        const div = document.createElement("div");
-        div.className = "connection-row";
-
-        div.innerHTML = `
-                <select class="conn-neighbor">
-                    ${getCityOptionsHTML()}
-                </select>
-                <input type="number" placeholder="Cost" class="conn-cost">
-            `;
-        container.appendChild(div);
-      }
-
-      updateAllDropdowns();
-      addConnectionRow();
-
-      async function saveNode() {
-        const newNode = document.getElementById("newNode").value.trim();
-        if (!newNode) {
-          alert("Please enter a City Name");
-          return;
-        }
-
-        const neighbors = document.getElementsByClassName("conn-neighbor");
-        const costs = document.getElementsByClassName("conn-cost");
-        let connectionsList = [];
-
-        for (let i = 0; i < neighbors.length; i++) {
-          let nVal = neighbors[i].value;
-          let cVal = costs[i].value.trim();
-          if (nVal && cVal)
-            connectionsList.push({ neighbor: nVal, cost: cVal });
-        }
-
-        if (connectionsList.length === 0) {
-          alert("Please add at least one connection.");
-          return;
-        }
-
-        const response = await fetch("/add_node", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ node: newNode, connections: connectionsList }),
-        });
-
-        const resData = await response.json();
-
-        if (resData.status === "success") {
-          try {
-            nodes.add({ id: newNode, label: newNode });
-          } catch (e) {}
-          connectionsList.forEach((conn) => {
-            try {
-              nodes.add({ id: conn.neighbor, label: conn.neighbor });
-            } catch (e) {}
-            edges.add({ from: newNode, to: conn.neighbor, label: conn.cost });
-          });
-
-          document.getElementById("newNode").value = "";
-          document.getElementById("connectionsContainer").innerHTML = "";
-
-          updateAllDropdowns();
-          addConnectionRow();
-
-          alert("Node Added!");
-        } else {
-          alert("Error adding node.");
-        }
-      }
-
-      async function runAlgo() {
-        const start = document.getElementById("start").value;
-        const goal = document.getElementById("goal").value;
-        const algo = document.getElementById("algo").value;
-
-        const runButton = document.querySelector(".btn-run");
-        runButton.disabled = true;
-        runButton.innerText = "Searching...";
-
-        const response = await fetch("/solve", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ start, goal, algo }),
-        });
-
-        const resData = await response.json();
-
-        if (resData.path.length > 0) {
-          document.getElementById("resultContainer").style.display = "block";
-          document.getElementById("resultPlaceholder").style.display = "none";
-          document.getElementById("resAlgo").innerText = algo;
-          document.getElementById("resCost").innerText = resData.cost;
-          document.getElementById("resSteps").innerText = resData.steps;
-
-          const pathList = document.getElementById("resPath");
-          pathList.innerHTML = "";
-          resData.path.forEach((city) => {
-            let li = document.createElement("li");
-            li.innerText = city;
-            pathList.appendChild(li);
-          });
-
-          nodes.forEach((node) =>
-            nodes.update({
-              id: node.id,
-              color: { background: "#e1bee7", border: "#8e24aa" },
-              font: { color: "black" },
-            })
-          );
-
-          for (const id of resData.path) {
-            nodes.update({
-              id: id,
-              color: { background: "#7b1fa2", border: "#4a148c" },
-              font: { color: "white" },
-            });
-
-            await new Promise((r) => setTimeout(r, 1000));
-          }
-        } else {
-          alert("No path found!");
-        }
-
-        runButton.disabled = false;
-        runButton.innerText = "Run Search Algorithm";
-      }
-    </script> -->
-
     <script type="text/javascript">
       if (typeof vis === "undefined") {
         alert(
@@ -368,7 +89,6 @@
         );
       }
 
-      // --- 1. DEFINE DATA (Variables first!) ---
       let nodesArray = [
         { id: "Arad", label: "Arad" },
         { id: "Zerind", label: "Zerind" },
@@ -440,7 +160,6 @@
 
       const network = new vis.Network(container, data, options);
 
-      // --- 2. DEFINE FUNCTIONS ---
       function getCityOptionsHTML() {
         const allNodes = nodes.get().sort((a, b) => a.id.localeCompare(b.id));
         let html = "";
@@ -589,7 +308,6 @@
         runButton.innerText = "Run Search Algorithm";
       }
 
-      // --- 3. SYNC FUNCTION ---
       async function fetchGraphOnLoad() {
         try {
           const response = await fetch('/get_graph');
@@ -625,7 +343,6 @@
         }
       }
 
-      // --- 4. INITIALIZE (CALL AT THE END) ---
       fetchGraphOnLoad();
       addConnectionRow();
     </script>
